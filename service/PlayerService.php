@@ -16,6 +16,7 @@ class PlayerService extends Rest implements IPlayerService{
 		$this->playerDAO = new PlayerDAO();
 	}
 	
+	
 	private function devolverError($id) {
 		$errores = array(
 				STATUS_METHOD_NOT_ALLOWED => "petición no aceptada",
