@@ -39,7 +39,7 @@ class PlayerDAO extends DAO {
 		
 		$players = array();		
 		
-		$query = $this->getConnection()->query("SELECT id_player, username, email FROM tch_player");
+		$query = $this->getConnection()->query("SELECT id_player, username, email, free FROM tch_player");
 		$rows = $query->fetchAll(\PDO::FETCH_ASSOC);
 		
 		foreach ($rows as $row){
@@ -47,6 +47,7 @@ class PlayerDAO extends DAO {
 			$player->setIdPlayer($row['id_player']);
 			$player->setUserName($row['username']);
 			$player->setEmail($row['email']);
+			$player->setFree($row['free']);
 			
 			array_push($players, $player);
 		}
