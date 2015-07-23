@@ -39,7 +39,7 @@ class PlayerDAO extends DAO {
 		
 		$players = array();		
 		
-		$query = $this->getConnection()->query("SELECT id_player, username, email, free FROM tch_player");
+		$query = $this->getConnection()->query("SELECT id_player, username, email, free, id_position, id_player_zone, id_category, id_image FROM tch_player");
 		$rows = $query->fetchAll(\PDO::FETCH_ASSOC);
 		
 		foreach ($rows as $row){
@@ -48,6 +48,10 @@ class PlayerDAO extends DAO {
 			$player->setUserName($row['username']);
 			$player->setEmail($row['email']);
 			$player->setFree($row['free']);
+			$player->getPosition()->setIdPosition($row['id_position']);
+			$player->getRegion()->setIdRegion($row['id_player_zone']);
+			$player->getGameCategory()->setIdGameCategory($row['id_category']);
+			$player->getImagePlayer()->setIdImagePlayer($row['id_image']);
 			
 			array_push($players, $player);
 		}
@@ -59,7 +63,7 @@ class PlayerDAO extends DAO {
 	
 		$player = NULL;
 	
-		$query = $this->getConnection()->prepare("SELECT id_player, username, email FROM tch_player WHERE id_player =:id_player");
+		$query = $this->getConnection()->prepare("SELECT id_player, username, email, free, id_position, id_player_zone, id_category, id_image FROM tch_player WHERE id_player =:id_player");
 		$query->bindValue(":id_player", $idPlayer);
 		$query->execute();
 		
@@ -69,8 +73,41 @@ class PlayerDAO extends DAO {
 			$player->setIdPlayer($row['id_player']);
 			$player->setUserName($row['username']);
 			$player->setEmail($row['email']);
+			$player->setFree($row['free']);
+			$player->getPosition()->setIdPosition($row['id_position']);
+			$player->getRegion()->setIdRegion($row['id_player_zone']);
+			$player->getGameCategory()->setIdGameCategory($row['id_category']);
+			$player->getImagePlayer()->setIdImagePlayer($row['id_image']);
 		}
 	
 		return $player;
+	}
+	/**
+	 * Modifica los datos del usuario
+	 * @param Player $player
+	 */
+	public function updateUser(Player $player){
+		$query = $this->getConnection()->prepare("UPDATE 	tch_player 
+												  SET 		email=:email, 
+															id_position=:id_position,
+															id_player_zone=:id_player_zone,
+															id_category=:id_category,
+															id_image=:id_image,
+															free=:free
+												  WHERE 	id_player=:id_player");
+		
+		$query->bindValue(":email", $player->getEmail());
+		$query->bindValue(":id_position", $player->getPosition()->getIdPosition());
+		$query->bindValue(":id_player_zone", $player->getRegion()->getIdRegion());
+		$query->bindValue(":id_category", $player->getGameCategory()->getIdGameCategory());
+		$query->bindValue(":id_image", $player->getImagePlayer()->getIdImagePlayer());
+		$query->bindValue(":free", $player->isFree());
+		$query->bindValue(":id_player", $player->getIdPlayer());
+		
+		$query->execute();
+		
+		$updatedRows = $query->rowCount();
+		
+		return ($updatedRows == 1);
 	}
 }

@@ -29,7 +29,8 @@ class PlayerService extends Rest implements IPlayerService{
 				'creando' => "error creando usuario",
 				'existe' => "usuario ya existe",
 				'nonExist' => "el jugador no existe",
-				'datosRequeridos' => "faltan datos"
+				'datosRequeridos' => "faltan datos",
+				'updateError' => "Hubo un error a la hora de actualizar los datos del usuario"
 		);
 		return $errores[$id];
 	}
@@ -110,9 +111,9 @@ class PlayerService extends Rest implements IPlayerService{
 	}
 
 	/* (non-PHPdoc)
-	 * @see \com\appstions\yourChallenge\service\IPlayerService::getPlayer()
+	 * @see \com\appstions\yourChallenge\service\IPlayerService::getUser()
 	 */
-	public function getPlayer($idPlayer) {
+	public function getUser($idPlayer) {
 		try {
 			if ($_SERVER['REQUEST_METHOD'] != "GET") {
 				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);
@@ -138,6 +139,55 @@ class PlayerService extends Rest implements IPlayerService{
 	
 			$this->mostrarRespuesta($respuesta, STATUS_OK);
 	
+		} catch (DAOException $e) {
+			$respuesta = $this->createResponse(ERROR, $e->getMessage());
+			$this->mostrarRespuesta($respuesta, $e->getCode());
+		} catch (Exception $e) {
+			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
+			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+		}
+		
+
+	}
+
+	/* (non-PHPdoc)
+	 * @see \com\appstions\yourChallenge\service\IPlayerService::updateUser()
+	 */
+	public function updateUser() {
+		try {
+			if ($_SERVER['REQUEST_METHOD'] != "POST") {
+				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);
+			}
+				
+			if(!isset($this->datosPeticion)){
+				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
+			}
+				
+			$params = $this->datosPeticion;
+				
+			if (is_array($params) == FALSE) {
+				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
+			}
+				
+			$player = new Player();
+				
+			if ($player->jsonUnserialize($params)) {
+				//el constructor del padre ya se encarga de sanear los datos de entrada
+					
+				$updated = $this->playerDAO->updateUser($player);
+				$respuesta = NULL;
+		
+				if($updated == TRUE){
+					$respuesta = $this->createResponse(SUCCESS, '', $updated);
+				} else {
+					$respuesta = $this->createResponse(ERROR, $this->devolverError('updateError'));
+				}
+		
+				$this->mostrarRespuesta($respuesta, STATUS_OK);
+		
+			}else{
+				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
+			}
 		} catch (DAOException $e) {
 			$respuesta = $this->createResponse(ERROR, $e->getMessage());
 			$this->mostrarRespuesta($respuesta, $e->getCode());

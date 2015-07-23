@@ -3,6 +3,10 @@ namespace com\appstions\yourChallenge\entity;
 
 require_once 'entity/JsonUnserializable.php';
 require_once 'entity/Position.php';
+require_once 'entity/Region.php';
+require_once 'entity/GameCategory.php';
+require_once 'entity/ImagePlayer.php';
+
 class Player implements \JsonSerializable, JsonUnserializable {
 	
 	private $idPlayer;
@@ -11,9 +15,15 @@ class Player implements \JsonSerializable, JsonUnserializable {
 	private $password;
 	private $free;
 	private $position;
+	private $region;
+	private $gameCategory;
+	private $imagePlayer;
 	
 	public function __construct(){
 		$this->position = new Position();
+		$this->region = new Region();
+		$this->gameCategory = new GameCategory();
+		$this->imagePlayer = new ImagePlayer();
 	}
 	public function setIdPlayer($idPlayer){
 		$this->idPlayer = $idPlayer;
@@ -62,7 +72,25 @@ class Player implements \JsonSerializable, JsonUnserializable {
 	public function setPosition(Position $position) {
 		$this->position = $position;
 	}
-	
+	public function getRegion() {
+		return $this->region;
+	}
+	public function setRegion($region) {
+		$this->region = $region;
+	}
+	public function getGameCategory() {
+		return $this->gameCategory;
+	}
+	public function setGameCategory($gameCategory) {
+		$this->gameCategory = $gameCategory;
+	}
+	public function getImagePlayer() {
+		return $this->imagePlayer;
+	}
+	public function setImagePlayer($imagePlayer) {
+		$this->imagePlayer = $imagePlayer;
+	}
+			
 	public function jsonSerialize(){
 		
 		return [
@@ -70,7 +98,10 @@ class Player implements \JsonSerializable, JsonUnserializable {
 				'userName' => $this->userName,
 				'email' => $this->email,
 				'free' => $this->free,
-				'position' => $this->position
+				'position' => $this->position,
+				'region' => $this->region,
+				'gameCategory' => $this->gameCategory,
+				'imagePlayer' => $this->imagePlayer
 		];	
 	}
 	/* (non-PHPdoc)
