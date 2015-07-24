@@ -1,13 +1,16 @@
 <?php
-
 namespace com\appstions\yourChallenge\service;
+
+use com\appstions\yourChallenge\dataAccess\DAOException;
+
+require_once 'dataAccess/DAOException.php';
 
 define('DEFAULT_STATUS', 200);
 define('DEFAULT_TYPE', "application/json");
 define('SUCCESS', 'success');
 define('ERROR', 'error');
 define('STATUS_OK', 200);
-define('STATUS_ERROR', 0);
+define('STATUS_ERROR', '500');
 define('STATUS_CREATED', 201);
 define('STATUS_ACCEPTED', 202);
 define('STATUS_NO_CONTENT', 204);
@@ -74,7 +77,7 @@ class Rest{
 	
 	private function tratarEntrada(){
 		$method = $_SERVER['REQUEST_METHOD'];
-		//var_dump($_SERVER);// 
+		
 		$contentType = NULL;
 		$isJsonData = FALSE;
 		
@@ -146,12 +149,67 @@ class Rest{
 	public function convertirJson($data) {
 		return json_encode($data);
 	}
-	
-	protected function createResponse($status, $message, $data = ''){
+	/**
+	 * Crea la respuesta en estado exitoso
+	 * @param string $country Codigo de Pais
+	 * @param string $data Datos que se quieren retornar
+	 */
+	protected function createResponse($country, $data = ''){
 		$response = array();
-		$response['status'] = $status;
-		$response['message'] = $message;
-		$response['data'] = $data;
+		
+		$response['header']['country'] = $country;
+		$response['header']['status'] = 'success';
+		$response['header']['errorCode'] = '';
+		$response['header']['message'] = '';
+		
+		$response['body'] = $data;
 		return $this->convertirJson($response);
+	}
+	/**
+	 * Crea la respuesta para los errores
+	 * @param string $country Codigo de Pais
+	 * @param string $errorCode Codigo del error
+	 * @param string $message Mensaje del error
+	 */
+	protected function createErrorResponse($country, $errorCode = '', $message){
+		$response = array();
+	
+		$response['header']['country'] = $country;
+		$response['header']['status'] = 'fail';
+		$response['header']['errorCode'] = $errorCode;
+		$response['header']['message'] = $message;
+	
+		$response['body'] = '';
+		return $this->convertirJson($response);
+	}
+	
+	/**
+	 * Revisa si los parametros estan bien tipados y si viene por POST
+	 * @throws DAOException
+	 */
+	protected function checkPostRequest(){
+		if ($_SERVER['REQUEST_METHOD'] != "POST") {
+			throw new DAOException('petición no aceptada', STATUS_METHOD_NOT_ALLOWED);
+		}
+		
+		if(!isset($this->datosPeticion)){
+			throw new DAOException('faltan los parametros', STATUS_BAD_REQUEST);
+		}
+			
+		if(!isset($this->datosPeticion['header'])){
+			throw new DAOException('falta el header', STATUS_BAD_REQUEST);
+		}
+			
+		if(!isset($this->datosPeticion['body'])){
+			throw new DAOException('faltan el body', STATUS_BAD_REQUEST);
+		}
+		
+		if (is_array($this->datosPeticion['header']) == FALSE || is_array($this->datosPeticion['body']) == FALSE) {
+			throw new DAOException('faltan datos', STATUS_BAD_REQUEST);
+		}
+		
+		if(!isset($this->datosPeticion['header']['country'])){
+			throw new DAOException('faltan el codigo de pais', STATUS_BAD_REQUEST);
+		}
 	}
 }

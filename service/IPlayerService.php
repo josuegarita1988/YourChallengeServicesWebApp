@@ -13,7 +13,7 @@ interface IPlayerService {
 	/**
 	 * Obtiene un jugador
 	 */
-	public function getUser($idPlayer);
+	public function getUser();
 	/**
 	 * Modifica los datos del usuario
 	 */

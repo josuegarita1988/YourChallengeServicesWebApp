@@ -39,47 +39,40 @@ class PlayerService extends Rest implements IPlayerService{
 	 * @see \Service\IPlayerService::login()
 	 */
 	public function login() {
+		
+		$respuesta = NULL;
+		
 		try {
-			if ($_SERVER['REQUEST_METHOD'] != "POST") {
-				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);	
-			}
+			$this->checkPostRequest();
 			
-			if(!isset($this->datosPeticion)){
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}			
+			$header = $this->datosPeticion['header'];
+			$body = $this->datosPeticion['body'];
 			
-			$params = $this->datosPeticion;
-			
-			if (is_array($params) == FALSE) {
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}				
+			$countryCode = $header['country'];
 			
 			$player = new Player();
 			
-			if ($player->jsonUnserialize($params)) {
+			if ($player->jsonUnserialize($body)) {
 				//el constructor del padre ya se encarga de sanear los datos de entrada				
 			
 				$data = $this->playerDAO->login($player);
-				$respuesta = NULL;
 				
 				if($data != NULL){
-					$respuesta = $this->createResponse(SUCCESS, '', $data);					
+					$respuesta = $this->createResponse($countryCode, $data);					
 				} else {
-					$respuesta = $this->createResponse(ERROR, $this->devolverError('pass'));
+					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, $this->devolverError('pass'));
 				}
-				
-				$this->mostrarRespuesta($respuesta, STATUS_OK);
 				
 			}else{
 				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
 			}
 		} catch (DAOException $e) {
-			$respuesta = $this->createResponse(ERROR, $e->getMessage()); 
-			$this->mostrarRespuesta($respuesta, $e->getCode());
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR)); 
-			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
 		}
+		
+		$this->mostrarRespuesta($respuesta, STATUS_OK);
 		
 	}
 
@@ -89,114 +82,114 @@ class PlayerService extends Rest implements IPlayerService{
 	public function players() {
 		
 		$respuesta = NULL;
-		var_dump($this->datosPeticion);
+		
 		try {
 				
-			if ($_SERVER['REQUEST_METHOD'] != "GET") {
-				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);
-			}
+			$this->checkPostRequest();
 				
+			$header = $this->datosPeticion['header'];
+			$body = $this->datosPeticion['body'];
+				
+			$countryCode = $header['country'];
+			
 			$players = $this->playerDAO->getUsers();
 			
-			$respuesta = $this->createResponse(SUCCESS, '', $players);
-			$this->mostrarRespuesta($respuesta, STATUS_OK);
+			$respuesta = $this->createResponse($countryCode, $players);
+			
 				
 		} catch (DAOException $e) {
-			$respuesta = $this->createResponse(ERROR, $e->getMessage());
-			$this->mostrarRespuesta($respuesta, $e->getCode());
+			$respuesta = $this->createErrorResponse('CRI', $e->getCode(), $e->getMessage());
+			$this->mostrarRespuesta($respuesta, STATUS_OK);
 		} catch (Exception $e) {
-			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
-			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+			$respuesta = $this->createErrorResponse('CRI', '500', $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
+			$this->mostrarRespuesta($respuesta, STATUS_OK);
 		}
+		
+		$this->mostrarRespuesta($respuesta, STATUS_OK);
+		
 	}
 
 	/* (non-PHPdoc)
 	 * @see \com\appstions\yourChallenge\service\IPlayerService::getUser()
 	 */
-	public function getUser($idPlayer) {
-		try {
-			if ($_SERVER['REQUEST_METHOD'] != "GET") {
-				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);
-			}
+	public function getUser() {
 		
-			if(!isset($idPlayer)){
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}
-						
-			$player = new Player();
-			$player->setIdPlayer($idPlayer);
+		$respuesta = NULL;
+		
+		try {
 			
-			//el constructor del padre ya se encarga de sanear los datos de entrada
+			$this->checkPostRequest();
+			
+			$header = $this->datosPeticion['header'];
+			$body = $this->datosPeticion['body'];
+			
+			$countryCode = $header['country'];
+			
+			$player = new Player();
+			
+			if ($player->jsonUnserialize($body)) {
+
+				$data = $this->playerDAO->getPlayer($player->getIdPlayer());
 				
-			$data = $this->playerDAO->getPlayer($player->getIdPlayer());
-			$respuesta = NULL;
-	
-			if($data != NULL){
-				$respuesta = $this->createResponse(SUCCESS, '', $data);
-			} else {
-				$respuesta = $this->createResponse(ERROR, $this->devolverError('nonExist'));
+				if($data != NULL){
+					$respuesta = $this->createResponse($countryCode, $data);
+				} else {
+					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, $this->devolverError('nonExist'));
+				}
+				
 			}
-	
-			$this->mostrarRespuesta($respuesta, STATUS_OK);
 	
 		} catch (DAOException $e) {
-			$respuesta = $this->createResponse(ERROR, $e->getMessage());
-			$this->mostrarRespuesta($respuesta, $e->getCode());
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
-			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
 		}
 		
-
+		$this->mostrarRespuesta($respuesta, STATUS_OK);
 	}
 
 	/* (non-PHPdoc)
 	 * @see \com\appstions\yourChallenge\service\IPlayerService::updateUser()
 	 */
 	public function updateUser() {
+		
+		$respuesta = NULL;
+		
 		try {
-			if ($_SERVER['REQUEST_METHOD'] != "POST") {
-				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);
-			}
+			
+			$this->checkPostRequest();
 				
-			if(!isset($this->datosPeticion)){
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}
+			$header = $this->datosPeticion['header'];
+			$body = $this->datosPeticion['body'];
 				
-			$params = $this->datosPeticion;
-				
-			if (is_array($params) == FALSE) {
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}
-				
+			$countryCode = $header['country'];
+			
 			$player = new Player();
 				
-			if ($player->jsonUnserialize($params)) {
+			if ($player->jsonUnserialize($body)) {
 				//el constructor del padre ya se encarga de sanear los datos de entrada
 					
 				$updated = $this->playerDAO->updateUser($player);
-				$respuesta = NULL;
+				
 		
 				if($updated == TRUE){
-					$respuesta = $this->createResponse(SUCCESS, '', $updated);
+					
+					$respuesta = $this->createResponse($countryCode, $updated);
 				} else {
-					$respuesta = $this->createResponse(ERROR, $this->devolverError('updateError'));
+					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, $this->devolverError('updateError'));
 				}
-		
-				$this->mostrarRespuesta($respuesta, STATUS_OK);
 		
 			}else{
 				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
 			}
 		} catch (DAOException $e) {
-			$respuesta = $this->createResponse(ERROR, $e->getMessage());
-			$this->mostrarRespuesta($respuesta, $e->getCode());
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
-			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
 		}
 		
-
+		$this->mostrarRespuesta($respuesta, STATUS_OK);
+		
 	}
 
 }

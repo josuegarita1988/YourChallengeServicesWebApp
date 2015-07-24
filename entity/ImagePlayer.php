@@ -10,8 +10,11 @@ class ImagePlayer implements \JsonSerializable, JsonUnserializable {
 	private $description;
 	private $extension;
 	
-	public function __construct(){
-		
+	public function __construct($idImagePlayer = 0, $logo = NULL, $description = NULL, $extension = NULL){
+		$this->idImagePlayer = $idImagePlayer;
+		$this->logo = $logo;
+		$this->description = $description;
+		$this->extension = $extension;
 	}
 	
 	public function getIdImagePlayer() {
