@@ -5,27 +5,23 @@ use com\appstions\yourChallenge\dataAccess\DAOException;
 
 require_once 'dataAccess/DAOException.php';
 
-define('DEFAULT_STATUS', 200);
-define('DEFAULT_TYPE', "application/json");
-define('SUCCESS', 'success');
-define('ERROR', 'error');
-define('STATUS_OK', 200);
-define('STATUS_ERROR', '500');
-define('STATUS_CREATED', 201);
-define('STATUS_ACCEPTED', 202);
-define('STATUS_NO_CONTENT', 204);
-define('STATUS_MOVED_PERMANENTLY', 301);
-define('STATUS_FOUND', 302);
-define('STATUS_SEE_OTHER', 303);
-define('STATUS_NOT_MODIFIED', 304);
-define('STATUS_BAD_REQUEST', 400);
-define('STATUS_UNAUTHORIZED', 401);
-define('STATUS_FORBIDEN', 403);
-define('STATUS_NOT_FOUND', 404);
-define('STATUS_METHOD_NOT_ALLOWED', 405);
-define('STATUS_INTERNAL_SERVER_ERROR', 500);
-define('SERVER_ERROR', "Hubo un error en el sistema");
+;
 class Rest{
+
+	const DEFAULT_STATUS =  200;
+	const STATUS_BAD_REQUEST =  400;
+	const STATUS_UNAUTHORIZED =  401;
+	const STATUS_FORBIDEN =  403;
+	const STATUS_NOT_FOUND =  404;
+	const STATUS_METHOD_NOT_ALLOWED =  405;
+	const STATUS_OK = 200;
+	const STATUS_ERROR = 500;
+	
+	const APPLICATION_JSON = "application/json";
+	const DEFAULT_TYPE =  "application/json";
+	
+	const SUCCESS =  'success';
+	const FAIL =  'fail';
 	
 	const HEADER = "header";
 	const BODY = "body";
@@ -34,9 +30,11 @@ class Rest{
 	const ERROR_CODE = "errorCode";
 	const MESSAGE = "message";
 	
-	public $tipo = DEFAULT_TYPE;
+	const SERVER_ERROR =  "Hubo un error en el sistema";
+	
+	public $tipo = self::DEFAULT_TYPE;
 	public $datosPeticion = array();
-	private $_codEstado = DEFAULT_STATUS;
+	private $_codEstado = self::DEFAULT_STATUS;
 	
 	 
 	
@@ -45,7 +43,7 @@ class Rest{
 	}
 	
 	public function mostrarRespuesta($data, $estado){
-		$this->_codEstado = ($estado)? $estado : DEFAULT_STATUS;
+		$this->_codEstado = ($estado)? $estado : self::DEFAULT_STATUS;
 		$this->setCabecera();
 		echo $data;
 		
@@ -93,7 +91,7 @@ class Rest{
 			$contentType = $_SERVER['CONTENT_TYPE'];
 		}
 		
-		if (strpos('application/json', $contentType) !== false) {	
+		if (strpos(self::APPLICATION_JSON, $contentType) !== false) {	
 			$isJsonData = TRUE;
 		}
 		
@@ -128,58 +126,54 @@ class Rest{
 				$this->datosPeticion = $this->limpiarEntrada($this->datosPeticion);
 			break;
 			default:
-				$this->response('', STATUS_NOT_FOUND);
+				$this->response('', self::STATUS_NOT_FOUND);
 			break;
 		}
 	}
 	
 	private function getCodEstado() {
 		$estado = array(
-				STATUS_OK => 'OK',
-				STATUS_ERROR => 'ERROR',
-				STATUS_CREATED => 'Created',
-				STATUS_ACCEPTED => 'Accepted',
-				STATUS_NO_CONTENT => 'No Content',
-				STATUS_MOVED_PERMANENTLY => 'Moved Permanently',
-				STATUS_FOUND => 'Found',
-				STATUS_SEE_OTHER => 'See Other',
-				STATUS_NOT_MODIFIED => 'Not Modified',
-				STATUS_BAD_REQUEST => 'Bad Request',
-				STATUS_UNAUTHORIZED => 'Unauthorized',
-				STATUS_FORBIDEN => 'Forbidden',
-				STATUS_NOT_FOUND => 'Not Found',
-				STATUS_METHOD_NOT_ALLOWED => 'Method Not Allowed',
-				STATUS_INTERNAL_SERVER_ERROR => 'Internal Server Error');
+				self::STATUS_OK => 'OK',
+				self::STATUS_ERROR => 'ERROR',
+				self::STATUS_BAD_REQUEST => 'Bad Request',
+				self::STATUS_UNAUTHORIZED => 'Unauthorized',
+				self::STATUS_FORBIDEN => 'Forbidden',
+				self::STATUS_NOT_FOUND => 'Not Found',
+				self::STATUS_METHOD_NOT_ALLOWED => 'Method Not Allowed',
+				self::STATUS_ERROR => 'Internal Server Error');
 		$respuesta = ($estado[$this->_codEstado]) ? $estado[$this->_codEstado] : $estado[STATUS_INTERNAL_SERVER_ERROR];
 		
 		return $respuesta;
 	}
-	public function convertirJson($data) {
+	
+	private function convertirJson($data) {
 		return json_encode($data);
 	}
+	
 	/**
 	 * Crea la respuesta en estado exitoso
 	 * @param string $country Codigo de Pais
 	 * @param string $data Datos que se quieren retornar
 	 */
-	protected function createResponse($country, $data = ''){
+	private function createSuccessResponse($country, $data = ''){
 		$response = array();
 		
 		$response[self::HEADER][self::COUNTRY] = $country;
-		$response[self::HEADER][self::STATUS] = 'success';
+		$response[self::HEADER][self::STATUS] = self::SUCCESS;
 		$response[self::HEADER][self::ERROR_CODE] = '';
 		$response[self::HEADER][self::MESSAGE] = '';
 		
 		$response[self::BODY] = $data;
 		return $this->convertirJson($response);
 	}
+	
 	/**
 	 * Crea la respuesta para los errores
 	 * @param string $country Codigo de Pais
 	 * @param string $errorCode Codigo del error
 	 * @param string $message Mensaje del error
 	 */
-	protected function createErrorResponse($country, $errorCode = '', $message){
+	private function createErrorResponse($country, $errorCode = '', $message){
 		$response = array();
 	
 		$response[self::HEADER][self::COUNTRY] = $country;
@@ -197,27 +191,47 @@ class Rest{
 	 */
 	protected function checkPostRequest(){
 		if ($_SERVER['REQUEST_METHOD'] != "POST") {
-			throw new DAOException('petición no aceptada', STATUS_METHOD_NOT_ALLOWED);
+			throw new DAOException('petición no aceptada', self::STATUS_METHOD_NOT_ALLOWED);
 		}
 		
 		if(!isset($this->datosPeticion)){
-			throw new DAOException('faltan los parametros', STATUS_BAD_REQUEST);
+			throw new DAOException('faltan los parametros', self::STATUS_BAD_REQUEST);
 		}
 			
-		if(!isset($this->datosPeticion['header'])){
-			throw new DAOException('falta el header', STATUS_BAD_REQUEST);
+		if(!isset($this->datosPeticion[self::HEADER])){
+			throw new DAOException('falta el header', self::STATUS_BAD_REQUEST);
 		}
 			
-		if(!isset($this->datosPeticion['body'])){
-			throw new DAOException('faltan el body', STATUS_BAD_REQUEST);
+		if(!isset($this->datosPeticion[self::BODY])){
+			throw new DAOException('faltan el body', self::STATUS_BAD_REQUEST);
 		}
 		
-		if (is_array($this->datosPeticion['header']) == FALSE || is_array($this->datosPeticion['body']) == FALSE) {
-			throw new DAOException('faltan datos', STATUS_BAD_REQUEST);
+		if (is_array($this->datosPeticion[self::HEADER]) == FALSE || is_array($this->datosPeticion[self::BODY]) == FALSE) {
+			throw new DAOException('faltan datos', self::STATUS_BAD_REQUEST);
 		}
 		
-		if(!isset($this->datosPeticion['header']['country'])){
-			throw new DAOException('faltan el codigo de pais', STATUS_BAD_REQUEST);
+		if(!isset($this->datosPeticion[self::HEADER][self::COUNTRY])){
+			throw new DAOException('faltan el codigo de pais', self::STATUS_BAD_REQUEST);
 		}
+	}
+	/**
+	 * Procesa el mensaje de exito
+	 * @param string $countryCode
+	 * @param object $data
+	 */
+	public function processSuccessResponse($countryCode, $data){
+		$respuesta = $this->createSuccessResponse($countryCode, $data);
+		$this->mostrarRespuesta($respuesta, self::STATUS_OK);
+	}
+	/**
+	 * Procesa el mensaje de error
+	 * @param string $country
+	 * @param string $errorCode
+	 * @param string $message
+	 */
+	public function processErrorResponse($country, $errorCode, $message){
+		
+		$respuesta = $this->createErrorResponse($country, $errorCode, $message);
+		$this->mostrarRespuesta($respuesta, self::STATUS_OK);
 	}
 }

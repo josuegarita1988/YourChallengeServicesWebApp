@@ -4,9 +4,10 @@ use com\appstions\yourChallenge\service\Rest;
 require_once("service/Rest.php");
 require_once("service/PlayerService.php");
 
-define('NAMESPACE_ROOT', "com\appstions\yourChallenge");
-
 class Api {
+
+	const NAMESPACE_ROOT = "com\appstions\yourChallenge\service";
+	const REQUEST_NOT_FOUND = "petición no encontrada";
 	
 	private $class;
 	private $method;
@@ -15,18 +16,12 @@ class Api {
 	public function __construct() {
 	}
 	
-	private function devolverError($id) {
-		$errores = array(
-				STATUS_NOT_FOUND => "petición no encontrada"
-		);
-		return $errores[$id];
-	}
-	
 	private function getClass($className){
+		
 		$respuesta = NULL;
 
 		$estado = array(
-				'player' => NAMESPACE_ROOT . '\service\PlayerService');
+				'player' => self::NAMESPACE_ROOT . '\PlayerService');
 		
 		if(array_key_exists($className, $estado)){
 			$respuesta = ($estado[$className]) ? $estado[$className] : NULL;
@@ -74,11 +69,11 @@ class Api {
 				
 			} else {
 				$rest = new Rest();
-				$rest->mostrarRespuesta($rest->convertirJson($this->devolverError(STATUS_NOT_FOUND)), STATUS_NOT_FOUND);
+				$rest->processErrorResponse('', Rest::STATUS_METHOD_NOT_ALLOWED, self::REQUEST_NOT_FOUND);
 			}
 		}
 		$rest = new Rest();
-		$rest->mostrarRespuesta($rest->convertirJson($this->devolverError(STATUS_NOT_FOUND)), STATUS_NOT_FOUND);
+		$rest->processErrorResponse('', Rest::STATUS_METHOD_NOT_ALLOWED, self::REQUEST_NOT_FOUND);
 	}
 	
 }

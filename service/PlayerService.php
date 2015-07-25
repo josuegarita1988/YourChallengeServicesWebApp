@@ -24,8 +24,6 @@ class PlayerService extends Rest implements IPlayerService{
 	 */
 	public function login() {
 		
-		$respuesta = NULL;
-		
 		try {
 			$this->checkPostRequest();
 			
@@ -42,21 +40,19 @@ class PlayerService extends Rest implements IPlayerService{
 				$data = $this->playerDAO->login($player);
 				
 				if($data != NULL){
-					$respuesta = $this->createResponse($countryCode, $data);					
+					$this->processSuccessResponse($countryCode, $data);					
 				} else {
-					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, IPlayerService::NOT_AUTHENTICATED);
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::NOT_AUTHENTICATED);
 				}
 				
 			}else{
-				throw new DAOException(IPlayerService::REQUIRED, STATUS_BAD_REQUEST);
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
 			}
 		} catch (DAOException $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
-		
-		$this->mostrarRespuesta($respuesta, STATUS_OK);
 		
 	}
 
@@ -64,8 +60,6 @@ class PlayerService extends Rest implements IPlayerService{
 	 * @see \Service\IPlayerService::players()
 	 */
 	public function players() {
-		
-		$respuesta = NULL;
 		
 		try {
 				
@@ -77,16 +71,14 @@ class PlayerService extends Rest implements IPlayerService{
 			
 			$players = $this->playerDAO->getUsers();
 			
-			$respuesta = $this->createResponse($countryCode, $players);
+			$this->processSuccessResponse($countryCode, $players);
 			
 				
 		} catch (DAOException $e) {
-			$respuesta = $this->createErrorResponse('', $e->getCode(), $e->getMessage());
+			$this->processErrorResponse('', $e->getCode(), $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
-		
-		$this->mostrarRespuesta($respuesta, STATUS_OK);
 		
 	}
 
@@ -94,8 +86,6 @@ class PlayerService extends Rest implements IPlayerService{
 	 * @see \com\appstions\yourChallenge\service\IPlayerService::getUser()
 	 */
 	public function getUser() {
-		
-		$respuesta = NULL;
 		
 		try {
 			
@@ -113,28 +103,24 @@ class PlayerService extends Rest implements IPlayerService{
 				$data = $this->playerDAO->getPlayer($player->getIdPlayer());
 				
 				if($data != NULL){
-					$respuesta = $this->createResponse($countryCode, $data);
+					$this->processSuccessResponse($countryCode, $data);
 				} else {
-					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, IPlayerService::PLAYER_NOT_EXIST);
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_EXIST);
 				}
 				
 			}
 	
 		} catch (DAOException $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
-		
-		$this->mostrarRespuesta($respuesta, STATUS_OK);
 	}
 
 	/* (non-PHPdoc)
 	 * @see \com\appstions\yourChallenge\service\IPlayerService::updateUser()
 	 */
 	public function updateUser() {
-		
-		$respuesta = NULL;
 		
 		try {
 			
@@ -154,22 +140,19 @@ class PlayerService extends Rest implements IPlayerService{
 				
 		
 				if($updated == TRUE){
-					
-					$respuesta = $this->createResponse($countryCode, $updated);
+					$this->processSuccessResponse($countryCode, $updated);
 				} else {
-					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, IPlayerService::PLAYER_NOT_UPDATED);
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_UPDATED);
 				}
 		
 			}else{
-				throw new DAOException(IPlayerService::REQUIRED, STATUS_BAD_REQUEST);
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
 			}
 		} catch (DAOException $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
-		
-		$this->mostrarRespuesta($respuesta, STATUS_OK);
 		
 	}
 
