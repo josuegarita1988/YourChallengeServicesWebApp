@@ -24,8 +24,16 @@ define('STATUS_FORBIDEN', 403);
 define('STATUS_NOT_FOUND', 404);
 define('STATUS_METHOD_NOT_ALLOWED', 405);
 define('STATUS_INTERNAL_SERVER_ERROR', 500);
-
+define('SERVER_ERROR', "Hubo un error en el sistema");
 class Rest{
+	
+	const HEADER = "header";
+	const BODY = "body";
+	const COUNTRY = "country";
+	const STATUS = "status";
+	const ERROR_CODE = "errorCode";
+	const MESSAGE = "message";
+	
 	public $tipo = DEFAULT_TYPE;
 	public $datosPeticion = array();
 	private $_codEstado = DEFAULT_STATUS;
@@ -157,12 +165,12 @@ class Rest{
 	protected function createResponse($country, $data = ''){
 		$response = array();
 		
-		$response['header']['country'] = $country;
-		$response['header']['status'] = 'success';
-		$response['header']['errorCode'] = '';
-		$response['header']['message'] = '';
+		$response[self::HEADER][self::COUNTRY] = $country;
+		$response[self::HEADER][self::STATUS] = 'success';
+		$response[self::HEADER][self::ERROR_CODE] = '';
+		$response[self::HEADER][self::MESSAGE] = '';
 		
-		$response['body'] = $data;
+		$response[self::BODY] = $data;
 		return $this->convertirJson($response);
 	}
 	/**
@@ -174,12 +182,12 @@ class Rest{
 	protected function createErrorResponse($country, $errorCode = '', $message){
 		$response = array();
 	
-		$response['header']['country'] = $country;
-		$response['header']['status'] = 'fail';
-		$response['header']['errorCode'] = $errorCode;
-		$response['header']['message'] = $message;
+		$response[self::HEADER][self::COUNTRY] = $country;
+		$response[self::HEADER][self::STATUS] = 'fail';
+		$response[self::HEADER][self::ERROR_CODE] = $errorCode;
+		$response[self::HEADER][self::MESSAGE] = $message;
 	
-		$response['body'] = '';
+		$response[self::BODY] = '';
 		return $this->convertirJson($response);
 	}
 	

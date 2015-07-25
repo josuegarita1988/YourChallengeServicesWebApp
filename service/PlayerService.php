@@ -10,30 +10,14 @@ require_once 'entity/Player.php';
 require_once 'dataAccess/PlayerDAO.php';
 
 class PlayerService extends Rest implements IPlayerService{
+	
 	private $playerDAO;
+		
 	public function __construct(){
 		parent::__construct();
 		$this->playerDAO = new PlayerDAO();
 	}
 	
-	
-	private function devolverError($id) {
-		$errores = array(
-				STATUS_METHOD_NOT_ALLOWED => "petición no aceptada",
-				STATUS_NO_CONTENT => "petición sin contenido",
-				STATUS_INTERNAL_SERVER_ERROR => 'Hubo un error en el sistema',
-				'pass' => "email o password incorrectos",
-				'borrando' => "error borrando usuario",
-				'actualizando' => "error actualizando nombre de usuario",
-				'email' => "error buscando usuario por email",
-				'creando' => "error creando usuario",
-				'existe' => "usuario ya existe",
-				'nonExist' => "el jugador no existe",
-				'datosRequeridos' => "faltan datos",
-				'updateError' => "Hubo un error a la hora de actualizar los datos del usuario"
-		);
-		return $errores[$id];
-	}
 	
 	/* (non-PHPdoc)
 	 * @see \Service\IPlayerService::login()
@@ -45,10 +29,10 @@ class PlayerService extends Rest implements IPlayerService{
 		try {
 			$this->checkPostRequest();
 			
-			$header = $this->datosPeticion['header'];
-			$body = $this->datosPeticion['body'];
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
 			
-			$countryCode = $header['country'];
+			$countryCode = $header[Rest::COUNTRY];
 			
 			$player = new Player();
 			
@@ -60,16 +44,16 @@ class PlayerService extends Rest implements IPlayerService{
 				if($data != NULL){
 					$respuesta = $this->createResponse($countryCode, $data);					
 				} else {
-					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, $this->devolverError('pass'));
+					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, IPlayerService::NOT_AUTHENTICATED);
 				}
 				
 			}else{
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
+				throw new DAOException(IPlayerService::REQUIRED, STATUS_BAD_REQUEST);
 			}
 		} catch (DAOException $e) {
 			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
 		}
 		
 		$this->mostrarRespuesta($respuesta, STATUS_OK);
@@ -87,10 +71,9 @@ class PlayerService extends Rest implements IPlayerService{
 				
 			$this->checkPostRequest();
 				
-			$header = $this->datosPeticion['header'];
-			$body = $this->datosPeticion['body'];
-				
-			$countryCode = $header['country'];
+			$header = $this->datosPeticion[Rest::HEADER];
+			
+			$countryCode = $header[Rest::COUNTRY];
 			
 			$players = $this->playerDAO->getUsers();
 			
@@ -98,11 +81,9 @@ class PlayerService extends Rest implements IPlayerService{
 			
 				
 		} catch (DAOException $e) {
-			$respuesta = $this->createErrorResponse('CRI', $e->getCode(), $e->getMessage());
-			$this->mostrarRespuesta($respuesta, STATUS_OK);
+			$respuesta = $this->createErrorResponse('', $e->getCode(), $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('CRI', '500', $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
-			$this->mostrarRespuesta($respuesta, STATUS_OK);
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
 		}
 		
 		$this->mostrarRespuesta($respuesta, STATUS_OK);
@@ -120,10 +101,10 @@ class PlayerService extends Rest implements IPlayerService{
 			
 			$this->checkPostRequest();
 			
-			$header = $this->datosPeticion['header'];
-			$body = $this->datosPeticion['body'];
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
 			
-			$countryCode = $header['country'];
+			$countryCode = $header[Rest::COUNTRY];
 			
 			$player = new Player();
 			
@@ -134,7 +115,7 @@ class PlayerService extends Rest implements IPlayerService{
 				if($data != NULL){
 					$respuesta = $this->createResponse($countryCode, $data);
 				} else {
-					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, $this->devolverError('nonExist'));
+					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, IPlayerService::PLAYER_NOT_EXIST);
 				}
 				
 			}
@@ -142,7 +123,7 @@ class PlayerService extends Rest implements IPlayerService{
 		} catch (DAOException $e) {
 			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
 		}
 		
 		$this->mostrarRespuesta($respuesta, STATUS_OK);
@@ -159,10 +140,10 @@ class PlayerService extends Rest implements IPlayerService{
 			
 			$this->checkPostRequest();
 				
-			$header = $this->datosPeticion['header'];
-			$body = $this->datosPeticion['body'];
-				
-			$countryCode = $header['country'];
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+			
+			$countryCode = $header[Rest::COUNTRY];
 			
 			$player = new Player();
 				
@@ -176,16 +157,16 @@ class PlayerService extends Rest implements IPlayerService{
 					
 					$respuesta = $this->createResponse($countryCode, $updated);
 				} else {
-					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, $this->devolverError('updateError'));
+					$respuesta = $this->createErrorResponse($countryCode, STATUS_ERROR, IPlayerService::PLAYER_NOT_UPDATED);
 				}
 		
 			}else{
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
+				throw new DAOException(IPlayerService::REQUIRED, STATUS_BAD_REQUEST);
 			}
 		} catch (DAOException $e) {
 			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createErrorResponse('', STATUS_ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
+			$respuesta = $this->createErrorResponse('', STATUS_ERROR, SERVER_ERROR);
 		}
 		
 		$this->mostrarRespuesta($respuesta, STATUS_OK);
