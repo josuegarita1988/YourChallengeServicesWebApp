@@ -5,7 +5,7 @@ require_once('DAOException.php');
 
 class DAO {
 	
-	const SERVER_DB = "yourchallenge-appstions.rhcloud.com";
+	const SERVER_DB = "localhost";//"yourchallenge-appstions.rhcloud.com";
 	const USER_DB = "adminy9lkYNE";
 	const PASSWORD_DB = "sz-z8rkJPbLV";
 	const NAME_DB = "yourchallenge";
