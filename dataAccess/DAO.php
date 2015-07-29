@@ -5,10 +5,10 @@ require_once('DAOException.php');
 
 class DAO {
 	
-	const SERVER_DB = "sql213.260mb.net";
-	const USER_DB = "n260m_16405978";
-	const PASSWORD_DB = "satelite";
-	const NAME_DB = "n260m_16405978_Team_Challenge_DB";
+	const SERVER_DB = "yourchallenge-appstions.rhcloud.com";
+	const USER_DB = "adminy9lkYNE";
+	const PASSWORD_DB = "sz-z8rkJPbLV";
+	const NAME_DB = "yourchallenge";
 	
 	const SERVER_DB_LOCAL = "localhost";
 	const USER_DB_LOCAL = "root";
