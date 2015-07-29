@@ -15,7 +15,12 @@ class PlayerService extends Rest implements IPlayerService{
 		
 	public function __construct(){
 		parent::__construct();
-		$this->playerDAO = new PlayerDAO();
+		
+		try{
+			$this->playerDAO = new PlayerDAO();
+		} catch (\Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		}
 	}
 	
 	
