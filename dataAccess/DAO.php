@@ -41,7 +41,7 @@ class DAO {
 		try {
 			$this->connection = new \PDO($dsn, $userName, $password);
 		} catch (PDOException $e) {
-			echo 'Falló la conexión: ' . $e->getMessage();
+			throw  new \Exception($e->getMessage(), $e->getCode());
 		}
 	}
 	/**
