@@ -5,9 +5,10 @@ require_once('DAOException.php');
 
 class DAO {
 	
-	const SERVER_DB = "127.8.45.2:3306";//"yourchallenge-appstions.rhcloud.com";
-	const USER_DB = "adminy9lkYNE";
-	const PASSWORD_DB = "sz-z8rkJPbLV";
+	const SERVER_DB = "OPENSHIFT_MYSQL_DB_HOST";
+	const SERVER_PORT = "OPENSHIFT_MYSQL_DB_PORT";
+	const USER_DB = "OPENSHIFT_MYSQL_DB_USERNAME";//adminy9lkYNE";
+	const PASSWORD_DB = "OPENSHIFT_MYSQL_DB_PASSWORD";//"sz-z8rkJPbLV";
 	const NAME_DB = "yourchallenge";
 	
 	const SERVER_DB_LOCAL = "localhost";
@@ -27,9 +28,9 @@ class DAO {
 		$password = '';
 	
 		if ($isProduction == true){
-			$dsn = 'mysql:dbname=' . self::NAME_DB . ';host=' . self::SERVER_DB;
-			$userName = self::USER_DB;
-			$password = self::PASSWORD_DB;
+			$dsn = 'mysql:dbname=' . self::NAME_DB . ';host=' . getenv(self::SERVER_DB).':'.getenv(self::SERVER_PORT);
+			$userName = getenv(self::USER_DB);
+			$password = getenv(self::PASSWORD_DB);
 		}else{
 			$dsn = 'mysql:dbname=' . self::NAME_DB_LOCAL . ';host=' . self::SERVER_DB_LOCAL;
 			$userName = self::USER_DB_LOCAL;
