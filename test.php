@@ -13,7 +13,7 @@
 		$password = '';
 	
 	
-			$dsn = 'mysql:dbname=' . self::NAME_DB . ';host=' . getenv($SERVER_DB).':'.getenv($SERVER_PORT);
+			$dsn = 'mysql:dbname=' . $NAME_DB . ';host=' . getenv($SERVER_DB).':'.getenv($SERVER_PORT);
 			$userName = getenv($USER_DB);
 			$password = getenv($PASSWORD_DB);
 			
