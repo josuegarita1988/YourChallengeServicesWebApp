@@ -40,7 +40,7 @@ class DAO {
 	
 		try {
 			$this->connection = new \PDO($dsn, $userName, $password);
-		} catch (PDOException $e) {
+		} catch (\PDOException $e) {
 			throw  new \Exception($e->getMessage(), $e->getCode());
 		}
 	}
