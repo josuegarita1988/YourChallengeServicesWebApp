@@ -18,7 +18,7 @@ class DAO {
 	private $connection = NULL;
 	
 	public function __construct() {
-		$this->conectarDB(false);
+		$this->conectarDB(true);
 	}
 	
 	private function conectarDB($isProduction) {
