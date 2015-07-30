@@ -38,7 +38,7 @@ class PlayerService extends Rest implements IPlayerService{
 			
 			if ($player->jsonUnserialize($body)) {
 				//el constructor del padre ya se encarga de sanear los datos de entrada				
-			
+				$player->setPassword(Helper::cryptUserPassword($player->getPassword()));
 				$data = $this->playerDAO->login($player);
 				
 				if($data != NULL){

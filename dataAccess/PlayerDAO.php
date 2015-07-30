@@ -172,18 +172,19 @@ class PlayerDAO extends DAO {
 	 * @param Player $player        	
 	 */
 	public function addUser(Player $player) {
-		$query = $this->getConnection ()->prepare ( "INSERT INTO (username, pass, email, free) 
-												 VALUES(:username, :pass, :email, :free)" );
+		$query = $this->getConnection ()->prepare ( "INSERT INTO tch_player (username, pass, email, free, seed) 
+												 VALUES(:username, :pass, :email, :free, :seed)" );
 		
-		$query->bindValue ( ":username", $player->getUserName () );
+		$query->bindValue ( ":username", $player->getUserName() );
 		//Llamada al método que encripta el password
-		$query->bindValue ( ":pass", $player->getPassword () );
-		$query->bindValue ( ":email", $player->getEmail () );
-		$query->bindValue ( ":id_position", $player->getPosition () );
+		$query->bindValue ( ":pass", $player->getPassword() );
+		$query->bindValue ( ":email", $player->getEmail() );
+		$query->bindValue ( ":free", true);
+		$query->bindValue ( ":seed", $player->getSeed() );
 		
 		$query->execute ();
 		
-		$insertedRows = $query->rowCount ();
+		$updatedRows = $query->rowCount ();
 		
 		return ($updatedRows == 1);
 	}

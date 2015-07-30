@@ -34,8 +34,7 @@ class DAO {
 			$dsn = 'mysql:dbname=' . self::NAME_DB_LOCAL . ';host=' . self::SERVER_DB_LOCAL;
 			$userName = self::USER_DB_LOCAL;
 			$password = self::PASSWORD_DB_LOCAL;
-		}
-			
+		}			
 	
 		try {
 			$this->connection = new \PDO($dsn, $userName, $password);
