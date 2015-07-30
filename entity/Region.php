@@ -35,6 +35,7 @@ class Region implements \JsonSerializable, JsonUnserializable {
 	
 	/* (non-PHPdoc)
 	 * @see JsonSerializable::jsonSerialize()
+	 * Realiza la conversión del arreglo al tipo JSON
 	 */
 	public function jsonSerialize() {
 		
@@ -47,12 +48,14 @@ class Region implements \JsonSerializable, JsonUnserializable {
 
 	/* (non-PHPdoc)
 	 * @see \com\appstions\yourChallenge\entity\JsonUnserializable::jsonUnserialize()
+	 * Realiza la conversión del arreglo al tipo objeto 
 	 */
 	public function jsonUnserialize(array $array) {
 		
 		$isValid = true;
 		
 		foreach ($array as $key => $value) {
+		   //Del core de php 
 			if(property_exists($this, $key)){
 				if($this->{$key} instanceof JsonUnserializable){
 						

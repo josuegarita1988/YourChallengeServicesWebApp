@@ -4,10 +4,12 @@ namespace com\appstions\yourChallenge\service;
 use com\appstions\yourChallenge\dataAccess\PlayerDAO;
 use com\appstions\yourChallenge\dataAccess\DAOException;
 use com\appstions\yourChallenge\entity\Player;
+use com\appstions\yourChallenge\helper\Helper;
 
 require_once 'service/IPlayerService.php';
 require_once 'entity/Player.php';
 require_once 'dataAccess/PlayerDAO.php';
+require_once 'helper/Helper.php';
 
 class PlayerService extends Rest implements IPlayerService{
 	
@@ -156,37 +158,45 @@ class PlayerService extends Rest implements IPlayerService{
 		
 	}
 	
-	/*public function crearUsuario() {
-		if ($_SERVER['REQUEST_METHOD'] != "POST") {
-			$this->mostrarRespuesta($this->convertirJson($this->devolverError(1)), 405);
-		}
-		if (isset($this->datosPeticion['nombre'], $this->datosPeticion['email'], $this->datosPeticion['pwd'])) {
-			$nombre = $this->datosPeticion['nombre'];
-			$pwd = $this->datosPeticion['pwd'];
-			$email = $this->datosPeticion['email'];
-			if (!$this->existeUsuario($email)) {
-				$query = $this->getConnection()->prepare("INSERT into usuario (username,email,password) VALUES (:nombre, :email, :pwd)");
-				$query->bindValue(":nombre", $nombre);
-				$query->bindValue(":email", $email);
-				$query->bindValue(":pwd", sha1($pwd));
-				$query->execute();
-				if ($query->rowCount() == 1) {
-					$id = $this->getConnection()->lastInsertId();
-					$respuesta['estado'] = 'correcto';
-					$respuesta['msg'] = 'usuario creado correctamente';
-					$respuesta['usuario']['id'] = $id;
-					$respuesta['usuario']['nombre'] = $nombre;
-					$respuesta['usuario']['email'] = $email;
-					$this->mostrarRespuesta($this->convertirJson($respuesta), STATUS_OK);
+	public function addUser(){
+		try {
+				
+			$this->checkPostRequest();
+		
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+				
+			$countryCode = $header[Rest::COUNTRY];
+				
+			$player = new Player();
+		
+			if ($player->jsonUnserialize($body)) {
+				//Encripta el password del usuario
+				$player->setPassword(Helper::cryptUserPassword($player->getPassword()));
+				//Se genera la semilla para los procesos posteriores
+				$player->setSeed(Helper::generateSeed());
+				//el constructor del padre ya se encarga de sanear los datos de entrada	
+				$inserted = $this->playerDAO->addUser($player);
+		
+				if($inserted == TRUE){
+					$this->processSuccessResponse($countryCode, $inserted);
+				} else {
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_UPDATED);
 				}
-				else
-					$this->mostrarRespuesta($this->convertirJson($this->devolverError(7)), 400);
+		
+			}else{
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
 			}
-			else
-				$this->mostrarRespuesta($this->convertirJson($this->devolverError(8)), 400);
-		} else {
-			$this->mostrarRespuesta($this->convertirJson($this->devolverError(7)), 400);
+		} catch (DAOException $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		} catch (Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
-	}*/
+	}
+	
+	
+	
+			
+			
 
 }

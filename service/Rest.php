@@ -28,7 +28,7 @@ class Rest{
 	const COUNTRY = "country";
 	const STATUS = "status";
 	const ERROR_CODE = "errorCode";
-	const MESSAGE = "message";
+	const ERROR_MESSAGE = "message";
 	
 	const SERVER_ERROR =  "Hubo un error en el sistema";
 	
@@ -161,7 +161,7 @@ class Rest{
 		$response[self::HEADER][self::COUNTRY] = $country;
 		$response[self::HEADER][self::STATUS] = self::SUCCESS;
 		$response[self::HEADER][self::ERROR_CODE] = '';
-		$response[self::HEADER][self::MESSAGE] = '';
+		$response[self::HEADER][self::ERROR_MESSAGE] = '';
 		
 		$response[self::BODY] = $data;
 		return $this->convertirJson($response);
@@ -177,9 +177,9 @@ class Rest{
 		$response = array();
 	
 		$response[self::HEADER][self::COUNTRY] = $country;
-		$response[self::HEADER][self::STATUS] = 'fail';
+		$response[self::HEADER][self::STATUS] = self::FAIL;
 		$response[self::HEADER][self::ERROR_CODE] = $errorCode;
-		$response[self::HEADER][self::MESSAGE] = $message;
+		$response[self::HEADER][self::ERROR_MESSAGE] = $message;
 	
 		$response[self::BODY] = '';
 		return $this->convertirJson($response);

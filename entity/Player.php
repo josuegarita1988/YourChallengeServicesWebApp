@@ -18,6 +18,7 @@ class Player implements \JsonSerializable, JsonUnserializable {
 	private $region;
 	private $gameCategory;
 	private $imagePlayer;
+	private $seed;
 	
 	public function __construct(){
 		$this->position = new Position();
@@ -90,6 +91,13 @@ class Player implements \JsonSerializable, JsonUnserializable {
 	public function setImagePlayer($imagePlayer) {
 		$this->imagePlayer = $imagePlayer;
 	}
+	public function setSeed($seed){
+		$this->seed = $seed;
+	}
+	public function getSeed(){
+		return $this->seed;
+	}
+	
 			
 	public function jsonSerialize(){
 		
