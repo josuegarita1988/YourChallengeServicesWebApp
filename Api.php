@@ -32,12 +32,19 @@ class Api {
 	
 	private function instanceClass($class){
 		$newInstance = NULL;
-		$className = $this->getClass($class);
-		if($className != NULL && ((int) class_exists($className, true) > 0)){
+		try {
 			
-			$newInstance = new $className();
+			$className = $this->getClass($class);
+			if($className != NULL && ((int) class_exists($className, true) > 0)){
+					
+				$newInstance = new $className();
+			}
+			
+			
+		} catch (\Exception $e) {
+			$rest = new Rest();
+			$rest->processErrorResponse('', Rest::STATUS_METHOD_NOT_ALLOWED, $e->getMessage());
 		}
-		
 		return $newInstance;
 	}
 	
