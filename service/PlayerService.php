@@ -1,3 +1,207 @@
+<<<<<<< HEAD
+<?php
+namespace com\appstions\yourChallenge\service;
+
+use com\appstions\yourChallenge\dataAccess\PlayerDAO;
+use com\appstions\yourChallenge\dataAccess\DAOException;
+use com\appstions\yourChallenge\entity\Player;
+use com\appstions\yourChallenge\helper\Helper;
+
+require_once 'service/IPlayerService.php';
+require_once 'entity/Player.php';
+require_once 'dataAccess/PlayerDAO.php';
+require_once 'helper/Helper.php';
+
+class PlayerService extends Rest implements IPlayerService{
+	
+	private $playerDAO;
+		
+	public function __construct(){
+		parent::__construct();
+		$this->playerDAO = new PlayerDAO();
+	}
+	
+	
+	/* (non-PHPdoc)
+	 * @see \Service\IPlayerService::login()
+	 */
+	public function login() {
+		
+		try {
+			$this->checkPostRequest();
+			
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+			
+			$countryCode = $header[Rest::COUNTRY];
+			
+			$player = new Player();
+			
+			if ($player->jsonUnserialize($body)) {
+				//el constructor del padre ya se encarga de sanear los datos de entrada				
+				$player->setPassword(Helper::cryptUserPassword($player->getPassword()));
+				$data = $this->playerDAO->login($player);
+				
+				if($data != NULL){
+					$this->processSuccessResponse($countryCode, $data);					
+				} else {
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::NOT_AUTHENTICATED);
+				}
+				
+			}else{
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
+			}
+		} catch (DAOException $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		} catch (Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
+		}
+		
+	}
+
+	/* (non-PHPdoc)
+	 * @see \Service\IPlayerService::players()
+	 */
+	public function players() {
+		
+		try {
+				
+			$this->checkPostRequest();
+				
+			$header = $this->datosPeticion[Rest::HEADER];
+			
+			$countryCode = $header[Rest::COUNTRY];
+			
+			$players = $this->playerDAO->getUsers();
+			
+			$this->processSuccessResponse($countryCode, $players);
+			
+				
+		} catch (DAOException $e) {
+			$this->processErrorResponse('', $e->getCode(), $e->getMessage());
+		} catch (Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
+		}
+		
+	}
+
+	/* (non-PHPdoc)
+	 * @see \com\appstions\yourChallenge\service\IPlayerService::getUser()
+	 */
+	public function getUser() {
+		
+		try {
+			
+			$this->checkPostRequest();
+			
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+			
+			$countryCode = $header[Rest::COUNTRY];
+			
+			$player = new Player();
+			
+			if ($player->jsonUnserialize($body)) {
+
+				$data = $this->playerDAO->getPlayer($player->getIdPlayer());
+				
+				if($data != NULL){
+					$this->processSuccessResponse($countryCode, $data);
+				} else {
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_EXIST);
+				}
+				
+			}
+	
+		} catch (DAOException $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		} catch (Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
+		}
+	}
+
+	/* (non-PHPdoc)
+	 * @see \com\appstions\yourChallenge\service\IPlayerService::updateUser()
+	 */
+	public function updateUser() {
+		
+		try {
+			
+			$this->checkPostRequest();
+				
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+			
+			$countryCode = $header[Rest::COUNTRY];
+			
+			$player = new Player();
+				
+			if ($player->jsonUnserialize($body)) {
+				//el constructor del padre ya se encarga de sanear los datos de entrada
+					
+				$updated = $this->playerDAO->updateUser($player);
+				
+		
+				if($updated == TRUE){
+					$this->processSuccessResponse($countryCode, $updated);
+				} else {
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_UPDATED);
+				}
+		
+			}else{
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
+			}
+		} catch (DAOException $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		} catch (Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
+		}
+		
+	}
+	
+	public function addUser(){
+		try {
+				
+			$this->checkPostRequest();
+		
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+				
+			$countryCode = $header[Rest::COUNTRY];
+				
+			$player = new Player();
+		
+			if ($player->jsonUnserialize($body)) {
+				//Encripta el password del usuario
+				$player->setPassword(Helper::cryptUserPassword($player->getPassword()));
+				//Se genera la semilla para los procesos posteriores
+				$player->setSeed(Helper::generateSeed());
+				//el constructor del padre ya se encarga de sanear los datos de entrada	
+				$inserted = $this->playerDAO->addUser($player);
+		
+				if($inserted == TRUE){
+					$this->processSuccessResponse($countryCode, $inserted);
+				} else {
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_UPDATED);
+				}
+		
+			}else{
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
+			}
+		} catch (DAOException $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		} catch (Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
+		}
+	}
+	
+	
+	
+			
+			
+
+}
+=======
 <?php
 namespace com\appstions\yourChallenge\service;
 
@@ -10,73 +214,53 @@ require_once 'entity/Player.php';
 require_once 'dataAccess/PlayerDAO.php';
 
 class PlayerService extends Rest implements IPlayerService{
+	
 	private $playerDAO;
+		
 	public function __construct(){
 		parent::__construct();
-		$this->playerDAO = new PlayerDAO();
+		
+		try{
+			$this->playerDAO = new PlayerDAO();
+		} catch (\Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		}
 	}
 	
-	private function devolverError($id) {
-		$errores = array(
-				STATUS_METHOD_NOT_ALLOWED => "petición no aceptada",
-				STATUS_NO_CONTENT => "petición sin contenido",
-				STATUS_INTERNAL_SERVER_ERROR => 'Hubo un error en el sistema',
-				'pass' => "email o password incorrectos",
-				'borrando' => "error borrando usuario",
-				'actualizando' => "error actualizando nombre de usuario",
-				'email' => "error buscando usuario por email",
-				'creando' => "error creando usuario",
-				'existe' => "usuario ya existe",
-				'nonExist' => "el jugador no existe",
-				'datosRequeridos' => "faltan datos"
-		);
-		return $errores[$id];
-	}
 	
 	/* (non-PHPdoc)
 	 * @see \Service\IPlayerService::login()
 	 */
 	public function login() {
+		
 		try {
-			if ($_SERVER['REQUEST_METHOD'] != "POST") {
-				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);	
-			}
+			$this->checkPostRequest();
 			
-			if(!isset($this->datosPeticion)){
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}			
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
 			
-			$params = $this->datosPeticion;
-			
-			if (is_array($params) == FALSE) {
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}				
+			$countryCode = $header[Rest::COUNTRY];
 			
 			$player = new Player();
 			
-			if ($player->jsonUnserialize($params)) {
+			if ($player->jsonUnserialize($body)) {
 				//el constructor del padre ya se encarga de sanear los datos de entrada				
 			
 				$data = $this->playerDAO->login($player);
-				$respuesta = NULL;
 				
 				if($data != NULL){
-					$respuesta = $this->createResponse(SUCCESS, '', $data);					
+					$this->processSuccessResponse($countryCode, $data);					
 				} else {
-					$respuesta = $this->createResponse(ERROR, $this->devolverError('pass'));
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::NOT_AUTHENTICATED);
 				}
 				
-				$this->mostrarRespuesta($respuesta, STATUS_OK);
-				
 			}else{
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
 			}
 		} catch (DAOException $e) {
-			$respuesta = $this->createResponse(ERROR, $e->getMessage()); 
-			$this->mostrarRespuesta($respuesta, $e->getCode());
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR)); 
-			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
 		
 	}
@@ -86,66 +270,133 @@ class PlayerService extends Rest implements IPlayerService{
 	 */
 	public function players() {
 		
-		$respuesta = NULL;
-		var_dump($this->datosPeticion);
 		try {
 				
-			if ($_SERVER['REQUEST_METHOD'] != "GET") {
-				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);
-			}
+			$this->checkPostRequest();
 				
+			$header = $this->datosPeticion[Rest::HEADER];
+			
+			$countryCode = $header[Rest::COUNTRY];
+			
 			$players = $this->playerDAO->getUsers();
 			
-			$respuesta = $this->createResponse(SUCCESS, '', $players);
-			$this->mostrarRespuesta($respuesta, STATUS_OK);
+			$this->processSuccessResponse($countryCode, $players);
+			
 				
 		} catch (DAOException $e) {
-			$respuesta = $this->createResponse(ERROR, $e->getMessage());
-			$this->mostrarRespuesta($respuesta, $e->getCode());
+			$this->processErrorResponse('', $e->getCode(), $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
-			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
+		}
+		
+	}
+
+	/* (non-PHPdoc)
+	 * @see \com\appstions\yourChallenge\service\IPlayerService::getUser()
+	 */
+	public function getUser() {
+		
+		try {
+			
+			$this->checkPostRequest();
+			
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+			
+			$countryCode = $header[Rest::COUNTRY];
+			
+			$player = new Player();
+			
+			if ($player->jsonUnserialize($body)) {
+
+				$data = $this->playerDAO->getPlayer($player->getIdPlayer());
+				
+				if($data != NULL){
+					$this->processSuccessResponse($countryCode, $data);
+				} else {
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_EXIST);
+				}
+				
+			}
+	
+		} catch (DAOException $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
+		} catch (Exception $e) {
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
 	}
 
 	/* (non-PHPdoc)
-	 * @see \com\appstions\yourChallenge\service\IPlayerService::getPlayer()
+	 * @see \com\appstions\yourChallenge\service\IPlayerService::updateUser()
 	 */
-	public function getPlayer($idPlayer) {
-		try {
-			if ($_SERVER['REQUEST_METHOD'] != "GET") {
-				throw new DAOException($this->devolverError(STATUS_METHOD_NOT_ALLOWED), STATUS_METHOD_NOT_ALLOWED);
-			}
+	public function updateUser() {
 		
-			if(!isset($idPlayer)){
-				throw new DAOException($this->devolverError('datosRequeridos'), STATUS_BAD_REQUEST);
-			}
-						
-			$player = new Player();
-			$player->setIdPlayer($idPlayer);
+		try {
 			
-			//el constructor del padre ya se encarga de sanear los datos de entrada
+			$this->checkPostRequest();
 				
-			$data = $this->playerDAO->getPlayer($player->getIdPlayer());
-			$respuesta = NULL;
-	
-			if($data != NULL){
-				$respuesta = $this->createResponse(SUCCESS, '', $data);
-			} else {
-				$respuesta = $this->createResponse(ERROR, $this->devolverError('nonExist'));
+			$header = $this->datosPeticion[Rest::HEADER];
+			$body = $this->datosPeticion[Rest::BODY];
+			
+			$countryCode = $header[Rest::COUNTRY];
+			
+			$player = new Player();
+				
+			if ($player->jsonUnserialize($body)) {
+				//el constructor del padre ya se encarga de sanear los datos de entrada
+					
+				$updated = $this->playerDAO->updateUser($player);
+				
+		
+				if($updated == TRUE){
+					$this->processSuccessResponse($countryCode, $updated);
+				} else {
+					$this->processErrorResponse($countryCode, Rest::STATUS_ERROR, IPlayerService::PLAYER_NOT_UPDATED);
+				}
+		
+			}else{
+				throw new DAOException(IPlayerService::REQUIRED, Rest::STATUS_BAD_REQUEST);
 			}
-	
-			$this->mostrarRespuesta($respuesta, STATUS_OK);
-	
 		} catch (DAOException $e) {
-			$respuesta = $this->createResponse(ERROR, $e->getMessage());
-			$this->mostrarRespuesta($respuesta, $e->getCode());
+			$this->processErrorResponse('', Rest::STATUS_ERROR, $e->getMessage());
 		} catch (Exception $e) {
-			$respuesta = $this->createResponse(ERROR, $this->devolverError(STATUS_INTERNAL_SERVER_ERROR));
-			$this->mostrarRespuesta($respuesta, STATUS_INTERNAL_SERVER_ERROR);
+			$this->processErrorResponse('', Rest::STATUS_ERROR, Rest::SERVER_ERROR);
 		}
 		
-
 	}
+	
+	/*public function crearUsuario() {
+		if ($_SERVER['REQUEST_METHOD'] != "POST") {
+			$this->mostrarRespuesta($this->convertirJson($this->devolverError(1)), 405);
+		}
+		if (isset($this->datosPeticion['nombre'], $this->datosPeticion['email'], $this->datosPeticion['pwd'])) {
+			$nombre = $this->datosPeticion['nombre'];
+			$pwd = $this->datosPeticion['pwd'];
+			$email = $this->datosPeticion['email'];
+			if (!$this->existeUsuario($email)) {
+				$query = $this->getConnection()->prepare("INSERT into usuario (username,email,password) VALUES (:nombre, :email, :pwd)");
+				$query->bindValue(":nombre", $nombre);
+				$query->bindValue(":email", $email);
+				$query->bindValue(":pwd", sha1($pwd));
+				$query->execute();
+				if ($query->rowCount() == 1) {
+					$id = $this->getConnection()->lastInsertId();
+					$respuesta['estado'] = 'correcto';
+					$respuesta['msg'] = 'usuario creado correctamente';
+					$respuesta['usuario']['id'] = $id;
+					$respuesta['usuario']['nombre'] = $nombre;
+					$respuesta['usuario']['email'] = $email;
+					$this->mostrarRespuesta($this->convertirJson($respuesta), STATUS_OK);
+				}
+				else
+					$this->mostrarRespuesta($this->convertirJson($this->devolverError(7)), 400);
+			}
+			else
+				$this->mostrarRespuesta($this->convertirJson($this->devolverError(8)), 400);
+		} else {
+			$this->mostrarRespuesta($this->convertirJson($this->devolverError(7)), 400);
+		}
+	}*/
 
 }
+>>>>>>> origin/DevelopBranch
