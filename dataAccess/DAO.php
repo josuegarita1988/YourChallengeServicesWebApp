@@ -30,7 +30,7 @@ class DAO {
 		if ($isProduction == true){
 			
 			//mysql://$OPENSHIFT_MYSQL_DB_HOST:$OPENSHIFT_MYSQL_DB_PORT/
-			$dsn = 'mysql://' . getenv(self::SERVER_DB).':'.getenv(self::SERVER_PORT);
+			$dsn = 'mysql:dbname=' . self::NAME_DB . ';host=' . getenv(self::SERVER_DB).':'.getenv(self::SERVER_PORT);
 			$userName = getenv(self::USER_DB);
 			$password = getenv(self::PASSWORD_DB);
 		}else{
