@@ -28,7 +28,9 @@ class DAO {
 		$password = '';
 	
 		if ($isProduction == true){
-			$dsn = 'mysql:dbname=' . self::NAME_DB . ';host=' . getenv(self::SERVER_DB).':'.getenv(self::SERVER_PORT);
+			//declare -x OPENSHIFT_MYSQL_DB_URL="mysql://adminy9lkYNE:sz-z8rkJPbLV@127.8.45.2:3306/"
+		
+			$dsn = 'mysql:host=' . getenv(self::SERVER_DB).':'.getenv(self::SERVER_PORT);
 			$userName = getenv(self::USER_DB);
 			$password = getenv(self::PASSWORD_DB);
 		}else{
@@ -41,6 +43,7 @@ class DAO {
 		try {
 			$this->connection = new \PDO($dsn, $userName, $password);
 		} catch (\PDOException $e) {
+			echo $e->getMessage();
 			throw  new \Exception($e->getMessage(), $e->getCode());
 		}
 	}
